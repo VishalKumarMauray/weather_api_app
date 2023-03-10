@@ -3,17 +3,19 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:weather_api/models/current-weather.dart';
+import 'package:intl/intl.dart';
+import 'package:weather_api/constant.dart';
+import 'package:weather_api/models/weather-forcast.dart';
 
 Future<WeatherData> fetchWeather(city) async {
   const String key = '03b130fd12f1f53657a2e0773740186e';
-  print(city);
   final uri = Uri.parse(
-      'https://api.openweathermap.org/data/2.5/weather?q=$city&units=metric&appid=$key');
+      'http://api.openweathermap.org/data/2.5/forecast?q=$city&units=metric&appid=$key');
 
   final response = await http.get(uri);
   try {
     if (response.statusCode == 200) {
+      // print(response.body);
       return WeatherData.fromJson(jsonDecode(response.body));
     } else {
       throw Exception(response.reasonPhrase);
@@ -33,26 +35,66 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late Future<WeatherData> futureWeather;
   String city = '';
-  // bool visible = false;
+  List<String> dates = [];
+  List<int> datesDays = [];
+  List<bool> active = [
+    true,
+    false,
+    false,
+    false,
+    false,
+  ];
+
+  dateList() {
+    final currentDate = DateTime.now();
+    for (int i = 0; i < 5; i++) {
+      final date = DateFormat('EEEE, d MMMM').format(
+        currentDate.add(
+          Duration(days: i),
+        ),
+      );
+      dates.add(date.toString());
+      datesDays.add(
+        int.parse(
+          DateFormat('d').format(
+            currentDate.add(
+              Duration(days: i),
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  updateIndex(index) {
+    for (int i = 0; i < 5; i++) {
+      if (i == index) {
+        setState(() {
+          active[i] = true;
+        });
+      } else {
+        setState(() {
+          active[i] = false;
+        });
+      }
+    }
+  }
+
+  Weather() {
+    print(datesDays);
+  }
 
   @override
   void initState() {
     futureWeather = fetchWeather('delhi');
+    dateList();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'weather api',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('weather'),
-        ),
+    return SafeArea(
+      child: Scaffold(
         body: FutureBuilder<WeatherData>(
           future: futureWeather,
           builder: (context, snapshot) {
@@ -62,222 +104,157 @@ class _HomeScreenState extends State<HomeScreen> {
             //     snapshot.data!.sys!.sunset! * 1000);
             // print('${sunrise.hour}:${sunrise.minute} am');
             // print('${sunset.hour - 12}:${sunset.minute} pm');
-            print("connection state ${snapshot.connectionState}");
-            return Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.fromLTRB(8, 16, 0, 0),
-                  child: Row(
-                    children: [
-                      // visible ?
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            border: Border.all(
-                              width: 2,
-                              color: Colors.grey,
+            // city = snapshot.data!.city!.name.toString();
+
+            return (snapshot.data != null)
+                ? Container(
+                    color: Colors.black,
+                    padding: const EdgeInsets.fromLTRB(32.0, 32, 32, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'text according to the climate!',
+                                style: TextStyle(
+                                  color: white,
+                                  fontSize: 18,
+                                ),
+                              ),
                             ),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: TextField(
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'enter the city...',
+                            const SizedBox(
+                              width: 64,
                             ),
-                            onChanged: (value) {
-                              setState(() {
-                                city = value;
-                              });
+                            Container(
+                              padding:
+                                  const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  width: 1,
+                                  color: grey,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.location_on,
+                                    color: white,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(
+                                    width: 8,
+                                  ),
+                                  Text(
+                                    snapshot.data!.city!.name.toString(),
+                                    style: const TextStyle(
+                                      color: white,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 48,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: const [
+                            Text(
+                              'Today',
+                              style: TextStyle(
+                                color: white,
+                                fontSize: 26,
+                              ),
+                            ),
+                            Text(
+                              '5 days >',
+                              style: TextStyle(
+                                color: grey,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 12,
+                        ),
+                        SizedBox(
+                          height: 55,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: dates.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  // updateIndex(index);
+                                  Weather();
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.all(6),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: active[index] ? pink : null,
+                                    border: Border.all(
+                                      width: 2,
+                                      color: active[index] ? pink : darkBlue,
+                                    ),
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      dates[index],
+                                      style: TextStyle(
+                                        color:
+                                            active[index] ? black : lightgrey,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        letterSpacing: 0.25,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
                             },
                           ),
                         ),
-                        // )
-                        //     : const Expanded(
-                        //         child: SizedBox(),
-                        //       ),
-                        // const SizedBox(
-                        //   width: 8,
-                      ),
-                      Container(
-                        decoration: const BoxDecoration(
-                          color:
-                              // visible ?
-                              Colors.blue,
-                          //  : Colors.grey[400],
-                          shape: BoxShape.circle,
+                        const SizedBox(
+                          height: 32,
                         ),
-                        child: IconButton(
-                            onPressed:
-                                snapshot.connectionState == ConnectionState.done
-                                    ? () {
-                                        setState(() {
-                                          if (city.isNotEmpty
-                                              // && visible == true
-                                              ) {
-                                            futureWeather = fetchWeather(city);
-                                          }
-                                          // visible = !visible;
-                                        });
-                                      }
-                                    : () {},
-                            icon:
-                                // visible ?
-                                const Icon(Icons.arrow_forward)
-                            // : Icon(
-                            //     Icons.search,
-                            //     color: Colors.grey[600],
-                            //   ),
-                            ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: snapshot.hasData &&
-                            snapshot.connectionState == ConnectionState.done
-                        ? Column(
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(25),
+                            color: darkBlue,
+                          ),
+                          child: Column(
                             children: [
-                              Text(
-                                snapshot.data!.name.toString(),
-                                style: const TextStyle(fontSize: 54),
-                              ),
-                              Image.network(
-                                'https://openweathermap.org/img/wn/${snapshot.data!.weather!.elementAt(0).icon}@2x.png',
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'lat: ${snapshot.data!.coord!.lat.toString()}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'lon: ${snapshot.data!.coord!.lon.toString()}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'id: ${snapshot.data!.weather!.elementAt(0).id}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'main: ${snapshot.data!.weather!.elementAt(0).main}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'description: ${snapshot.data!.weather!.elementAt(0).description}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'icon: ${snapshot.data!.weather!.elementAt(0).icon}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'base: ${snapshot.data!.base}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'feels like: ${snapshot.data!.main!.feels_like}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'humidity: ${snapshot.data!.main!.humidity}', // %
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'pressure: ${snapshot.data!.main!.pressure}', //hpa
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'temp: ${snapshot.data!.main!.temp}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'temp max: ${snapshot.data!.main!.temp_max}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'temp min: ${snapshot.data!.main!.temp_min}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'visibility: ${snapshot.data!.visibility}', // /1000 km
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'speed: ${snapshot.data!.wind!.speed}', // meter/sec
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'deg: ${snapshot.data!.wind!.deg}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'all: ${snapshot.data!.clouds!.all}', //cloudiness %
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'dt: ${snapshot.data!.dt}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'country: ${snapshot.data!.sys!.country}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'id: ${snapshot.data!.sys!.id}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'sun rise: ${snapshot.data!.sys!.sunrise}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'sun set: ${snapshot.data!.sys!.sunset}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'type: ${snapshot.data!.sys!.type}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'timezone: ${snapshot.data!.timezone}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'id: ${snapshot.data!.id}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'name: ${snapshot.data!.name}',
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(height: 32),
-                              Text(
-                                'cod: ${snapshot.data!.cod}',
-                                style: const TextStyle(fontSize: 24),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  // Text(snapshot.data.list);
+                                  // Image.network(
+                                  // 'https://openweathermap.org/img/wn/${snapshot.data!.weather!.elementAt(0).icon}@2x.png',
+                                  // ),
+                                ],
                               ),
                             ],
-                          )
-                        : snapshot.hasError
-                            ? Text(snapshot.error.toString())
-                            : const CircularProgressIndicator(),
-                  ),
-                ),
-              ],
-            );
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : snapshot.hasError
+                    ? Text(snapshot.error.toString())
+                    : const Center(
+                        child: CircularProgressIndicator(),
+                      );
           },
         ),
       ),
