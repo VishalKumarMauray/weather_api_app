@@ -29,22 +29,22 @@ class WeatherData {
 
 class Wlist {
 //   int? dt;
-//   Main? main;
+  Main? main;
   List<Weather>? weather;
-//   Clouds? clouds;
-//   Wind? wind;
-//   int? visibility;
+  // Clouds? clouds;
+  Wind? wind;
+  int? visibility;
 //   int? pop;
 //   Sys? sys;
   DateTime? dt_txt;
 
   Wlist({
 //     this.dt,
-//     this.main,
+    this.main,
     this.weather,
-//     this.clouds,
-//     this.wind,
-//     this.visibility,
+    // this.clouds,
+    this.wind,
+    this.visibility,
 //     this.pop,
 //     this.sys,
     this.dt_txt,
@@ -52,79 +52,80 @@ class Wlist {
 
   Wlist.fromJson(Map<String, dynamic> json) {
 //     dt = json['dt'];
-//     main = json['main'] != null ? Main.fromJson(json['main']) : null;
+    main = json['main'] != null ? Main.fromJson(json['main']) : null;
     if (json['weather'] != null) {
       weather = [];
       json['weather'].forEach((v) {
         weather!.add(Weather.fromJson(v));
       });
     }
-//     clouds = json['clouds'] != null ? Clouds.fromJson(json['Clouds']) : null;
-//     wind = json['wind'] != null ? Wind.fromJson(json['wind']) : null;
-//     visibility = json['visibility'];
+    // clouds = json['clouds'] != null ? Clouds.fromJson(json['Clouds']) : null;
+    wind = json['wind'] != null ? Wind.fromJson(json['wind']) : null;
+    visibility = json['visibility'];
 //     pop = json['pop'];
 //     sys = json['sys'] != null ? Sys.fromJson(json['sys']) : null;
     dt_txt = DateTime.parse(json['dt_txt'].toString());
   }
 }
 
-// class Main {
-//   double? temp;
+class Main {
+  num? temp;
 //   double? feels_like;
 //   double? temp_min;
 //   double? temp_max;
 //   int? pressure;
 //   int? sea_level;
 //   int? grnd_level;
-//   int? humidity;
+  int? humidity;
 //   double? temp_kf;
-//   Main({
-//     this.temp,
+  Main({
+    this.temp,
 //     this.feels_like,
 //     this.temp_min,
 //     this.temp_max,
 //     this.pressure,
 //     this.sea_level,
 //     this.grnd_level,
-//     this.humidity,
+    this.humidity,
 //     this.temp_kf,
-//   });
+  });
 
-//   Main.fromJson(Map<String, dynamic> json) {
-//     temp = json['temp'];
+  Main.fromJson(Map<String, dynamic> json) {
+    temp = json['temp'];
 //     feels_like = json['feels_like'];
 //     temp_min = json['temp_min'];
 //     temp_max = json['temp_max'];
 //     pressure = json['pressure'];
 //     sea_level = json['sea_level'];
 //     grnd_level = json['grnd_level'];
-//     humidity = json['humidity'];
+    humidity = json['humidity'];
 //     temp_kf = json['temp_kf'];
-//   }
-// }
+  }
+}
 
 class Weather {
 //   int? id;
 //   String? main;
-//   String? description;
+  String? description;
   String? icon;
   Weather({
 //     this.id,
 //     this.main,
-//     this.description,
+    this.description,
     this.icon,
   });
 
   Weather.fromJson(Map<String, dynamic> json) {
 //     id = json['id'];
 //     main = json['main'];
-//     description = json['description'];
+    description = json['description'];
     icon = json['icon'];
   }
 }
 
 // class Clouds {
 //   int? all;
+
 //   Clouds({
 //     this.all,
 //   });
@@ -134,22 +135,22 @@ class Weather {
 //   }
 // }
 
-// class Wind {
-//   double? speed;
+class Wind {
+  double? speed;
 //   int? deg;
 //   double? gust;
-//   Wind({
-//     this.speed,
+  Wind({
+    this.speed,
 //     this.deg,
 //     this.gust,
-//   });
+  });
 
-//   Wind.fromJson(Map<String, dynamic> json) {
-//     speed = json['speed'];
+  Wind.fromJson(Map<String, dynamic> json) {
+    speed = json['speed'];
 //     deg = json['deg'];
 //     gust = json['gust'];
-//   }
-// }
+  }
+}
 
 // class Sys {
 //   String? pod;
