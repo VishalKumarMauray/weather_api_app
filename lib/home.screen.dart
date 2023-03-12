@@ -1,28 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:weather_api/constant.dart';
+import 'package:weather_api/days-data.dart';
 import 'package:weather_api/models/weather-forcast.dart';
-
-Future<WeatherData> fetchWeather(city) async {
-  const String key = '03b130fd12f1f53657a2e0773740186e';
-  final uri = Uri.parse(
-      'http://api.openweathermap.org/data/2.5/forecast?q=$city&units=metric&appid=$key');
-  final response = await http.get(uri);
-  try {
-    if (response.statusCode == 200) {
-      // print(response.body);
-      return WeatherData.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception(response.reasonPhrase);
-    }
-  } catch (e) {
-    throw "$e";
-  }
-}
+import 'package:weather_api/provider/weather_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,9 +16,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Future<WeatherData> futureWeather;
   String city = '';
   var hourData = [];
+  var dayData = [];
   List<String> dates = [];
   List<int> datesDays = [];
   List<bool> active = [
@@ -72,39 +56,38 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   hourly(data) {
+    // var day = DateTime.now().day + 1;
     data!.list!.where((element) {
-      element.dt_txt!.day == DateTime.now().day ? hourData.add(element) : null;
-
+      print(element['dt_txt'].toString());
+      // element['dt_txt'] == DateTime.now().day ? print(element) : null;
+      // print(hourData);
+      // if (element.dt_txt!.day == day) {
+      //   dayData.add(element);
+      //   day++;
+      // }
       return true;
     }).toString();
   }
 
   @override
   void initState() {
-    futureWeather = fetchWeather('melbourne');
     dateList();
     super.initState();
+    final postModel = Provider.of<WeatherProvider>(context, listen: false);
+    postModel.getData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: FutureBuilder<WeatherData>(
-          future: futureWeather,
-          builder: (context, snapshot) {
-            // DateTime sunrise = DateTime.fromMillisecondsSinceEpoch(
-            //     snapshot.data!.sys!.sunrise! * 1000);
-            // DateTime sunset = DateTime.fromMillisecondsSinceEpoch(
-            //     snapshot.data!.sys!.sunset! * 1000);
-            // print('${sunrise.hour}:${sunrise.minute} am');
-            // print('${sunset.hour - 12}:${sunset.minute} pm');
-            // city = snapshot.data!.city!.name.toString();
-
-            if (snapshot.data != null) {
-              var data = snapshot.data;
-              hourly(data);
-              return Container(
+    final postModel = Provider.of<WeatherProvider>(context);
+    hourly(postModel.post);
+    return postModel.isLoading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : SafeArea(
+            child: Scaffold(
+              body: Container(
                 color: Colors.black,
                 padding: const EdgeInsets.fromLTRB(32.0, 32, 32, 0),
                 child: Column(
@@ -114,12 +97,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            snapshot.data!.list!
-                                .elementAt(0)
-                                .weather!
-                                .elementAt(0)
-                                .description
-                                .toString(),
+                            postModel.post?.list!
+                                    .elementAt(0)['weather'][0]['description']
+                                    .toString() ??
+                                "",
                             style: const TextStyle(
                               color: white,
                               fontSize: 18,
@@ -149,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 width: 8,
                               ),
                               Text(
-                                snapshot.data!.city!.name.toString(),
+                                postModel.post?.city['name'].toString() ?? "",
                                 style: const TextStyle(
                                   color: white,
                                   fontSize: 18,
@@ -165,19 +146,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
+                      children: [
+                        const Text(
                           'Today',
                           style: TextStyle(
                             color: white,
                             fontSize: 26,
                           ),
                         ),
-                        Text(
-                          '5 days >',
-                          style: TextStyle(
-                            color: grey,
-                            fontSize: 20,
+                        GestureDetector(
+                          onTap: () {
+                            // daysData();
+                          },
+                          child: const Text(
+                            '5 days >',
+                            style: TextStyle(
+                              color: grey,
+                              fontSize: 20,
+                            ),
                           ),
                         ),
                       ],
@@ -238,13 +224,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Image.network(
-                                'https://openweathermap.org/img/wn/${snapshot.data!.list!.elementAt(0).weather!.elementAt(0).icon}@2x.png',
+                                'https://openweathermap.org/img/wn/${postModel.post?.list!.elementAt(0)['weather'][0]['icon']}@2x.png',
                                 scale: 0.6,
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(top: 42.0),
                                 child: Text(
-                                  '${snapshot.data!.list!.elementAt(0).main!.temp!.toInt()}\u00B0',
+                                  '${postModel.post?.list!.elementAt(0)['main']['temp'].toInt()}\u00B0',
                                   style: const TextStyle(
                                     color: white,
                                     fontSize: 64,
@@ -285,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         height: 4,
                                       ),
                                       Text(
-                                        '${(snapshot.data!.list!.elementAt(0).wind!.speed! * 3.6).toInt()} km/h',
+                                        '${(postModel.post?.list!.elementAt(0)['wind']['speed'] * 3.6).toInt()} km/h',
                                         style: const TextStyle(
                                           color: lightgrey,
                                           fontSize: 16,
@@ -325,7 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         height: 4,
                                       ),
                                       Text(
-                                        '${snapshot.data!.list!.elementAt(0).main!.humidity} %',
+                                        '${postModel.post?.list!.elementAt(0)['main']['humidity']} %',
                                         style: const TextStyle(
                                           color: lightgrey,
                                           fontSize: 16,
@@ -365,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         height: 4,
                                       ),
                                       Text(
-                                        '${snapshot.data!.list!.elementAt(0).visibility! ~/ 1000} km',
+                                        '${postModel.post?.list!.elementAt(0)['visibility'] ~/ 1000} km',
                                         style: const TextStyle(
                                           color: lightgrey,
                                           fontSize: 16,
@@ -430,20 +416,44 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         },
                       ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: dayData.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text(
+                                  DateFormat('EEEE, d MMMM')
+                                      .format(dayData[index].dt_txt),
+                                  style: const TextStyle(
+                                    color: white,
+                                    letterSpacing: 0.25,
+                                  ),
+                                ),
+                                Image.network(
+                                  'https://openweathermap.org/img/wn/${dayData[index].weather!.elementAt(0).icon}@2x.png',
+                                  scale: 1.7,
+                                ),
+                                Text(
+                                  '${dayData[index].main!.temp!.toInt()}\u00B0',
+                                  style: const TextStyle(
+                                    color: white,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     )
                   ],
                 ),
-              );
-            } else {
-              return snapshot.hasError
-                  ? Text(snapshot.error.toString())
-                  : const Center(
-                      child: CircularProgressIndicator(),
-                    );
-            }
-          },
-        ),
-      ),
-    );
+              ),
+            ),
+          );
   }
 }
