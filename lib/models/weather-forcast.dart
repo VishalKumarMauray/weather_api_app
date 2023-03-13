@@ -69,7 +69,7 @@ class Wlist {
 }
 
 class Main {
-  double? temp;
+  num? temp;
 //   double? feels_like;
 //   double? temp_min;
 //   double? temp_max;
@@ -135,7 +135,7 @@ class Weather {
 // }
 
 class Wind {
-  double? speed;
+  num? speed;
 //   int? deg;
 //   double? gust;
   Wind({

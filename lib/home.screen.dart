@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -16,11 +17,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String city = '';
-  var hourData = [];
-  var dayData = [];
+  String selectedDate = DateTime.now().day.toString();
   List<String> dates = [];
-  List<int> datesDays = [];
   List<bool> active = [
     true,
     false,
@@ -37,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Duration(days: i),
         ),
       );
-      dates.add(date.toString());
+      dates.add(date);
     }
   }
 
@@ -46,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (i == index) {
         setState(() {
           active[i] = true;
+          selectedDate = dates[i].split(' ')[1];
         });
       } else {
         setState(() {
@@ -53,18 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     }
-  }
-
-  hourly(data) {
-    // var day = DateTime.now().day + 1;
-    data!.list!.where((element) {
-      element.dt_txt!.day == DateTime.now().day ? hourData.add(element) : null;
-      // if (element.dt_txt!.day == day) {
-      //   dayData.add(element);
-      //   day++;
-      // }
-      return true;
-    }).toString();
   }
 
   @override
@@ -78,16 +65,36 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final postModel = Provider.of<WeatherProvider>(context);
-    hourly(postModel.post);
+    String city = '';
+    var hourData = [];
+    List<int> datesDays = [];
+
+    hourly(data) {
+      data!.list!.where((element) {
+        element.dt_txt!.day.toString() == selectedDate
+            ? hourData.add(element)
+            : null;
+        return true;
+      }).toString();
+    }
+
     if (postModel.isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
       );
     } else {
+      hourly(postModel.post);
       return SafeArea(
         child: Scaffold(
           body: Container(
-            color: Colors.black,
+            // color: Colors.black,
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                colors: [gradientPink, Colors.black],
+                center: Alignment.topLeft,
+                radius: 0.75,
+              ),
+            ),
             padding: const EdgeInsets.fromLTRB(32.0, 32, 32, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,13 +103,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        postModel.post?.list!
-                                .elementAt(0)
-                                .weather!
-                                .elementAt(0)
-                                .description
-                                .toString() ??
-                            '',
+                        hourData
+                            .elementAt(0)
+                            .weather!
+                            .elementAt(0)
+                            .description
+                            .toString(),
                         style: const TextStyle(
                           color: white,
                           fontSize: 18,
@@ -158,7 +164,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        // daysData();
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                daysData(snapshot: postModel.post)));
                       },
                       child: const Text(
                         '5 days >',
@@ -225,13 +233,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Image.network(
-                            'https://openweathermap.org/img/wn/${postModel.post?.list!.elementAt(0).weather!.elementAt(0).icon}@2x.png',
+                            'https://openweathermap.org/img/wn/${hourData.elementAt(0).weather!.elementAt(0).icon}@2x.png',
                             scale: 0.6,
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 42.0),
                             child: Text(
-                              '${postModel.post?.list!.elementAt(0).main!.temp!.toInt()}\u00B0',
+                              '${hourData.elementAt(0).main!.temp!.toInt()}\u00B0',
                               style: const TextStyle(
                                 color: white,
                                 fontSize: 64,
@@ -272,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 4,
                                   ),
                                   Text(
-                                    '${((postModel.post?.list!.elementAt(0).wind!.speed!)! * 3.6).toInt()} km/h',
+                                    '${((hourData.elementAt(0).wind!.speed!)! * 3.6).toInt()} km/h',
                                     style: const TextStyle(
                                       color: lightgrey,
                                       fontSize: 16,
@@ -312,7 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 4,
                                   ),
                                   Text(
-                                    '${postModel.post?.list!.elementAt(0).main!.humidity} %',
+                                    '${hourData.elementAt(0).main!.humidity} %',
                                     style: const TextStyle(
                                       color: lightgrey,
                                       fontSize: 16,
@@ -352,7 +360,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     height: 4,
                                   ),
                                   Text(
-                                    '${(postModel.post?.list!.elementAt(0).visibility)! ~/ 1000} km',
+                                    '${(hourData.elementAt(0).visibility)! ~/ 1000} km',
                                     style: const TextStyle(
                                       color: lightgrey,
                                       fontSize: 16,
@@ -418,41 +426,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
-                //   Expanded(
-                //     child: ListView.builder(
-                //       itemCount: dayData.length,
-                //       itemBuilder: (context, index) {
-                //         return Container(
-                //           child: Row(
-                //             mainAxisAlignment: MainAxisAlignment.spaceAround,
-                //             children: [
-                //               Text(
-                //                 DateFormat('EEEE, d MMMM')
-                //                     .format(dayData[index].dt_txt),
-                //                 style: const TextStyle(
-                //                   color: white,
-                //                   letterSpacing: 0.25,
-                //                 ),
-                //               ),
-                //               Image.network(
-                //                 'https://openweathermap.org/img/wn/${dayData[index].weather!.elementAt(0).icon}@2x.png',
-                //                 scale: 1.7,
-                //               ),
-                //               Text(
-                //                 '${dayData[index].main!.temp!.toInt()}\u00B0',
-                //                 style: const TextStyle(
-                //                   color: white,
-                //                   fontSize: 20,
-                //                 ),
-                //               ),
-                //             ],
-                //           ),
-                //         );
-                //       },
-                // ),
-                // )
-                // ],
-                // ),
               ],
             ),
           ),

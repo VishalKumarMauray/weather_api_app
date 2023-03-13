@@ -13,13 +13,12 @@ Future<WeatherData?> fetchWeather(city) async {
     if (response.statusCode == 200) {
       final item = json.decode(response.body);
       result = WeatherData.fromJson(item);
-      // return result;
     } else {
-      // throw Exception(response.reasonPhrase);
       print('error');
     }
   } catch (e) {
-    throw "$e";
+    print(e.toString());
+    throw e;
   }
   return result;
 }
