@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:weather_api/constant.dart';
+import 'package:weather_api/provider/weather_provider.dart';
 
 class daysData extends StatefulWidget {
   daysData({super.key, required this.snapshot});
@@ -11,107 +13,152 @@ class daysData extends StatefulWidget {
 }
 
 class _daysDataState extends State<daysData> {
-  var dayData = [];
-
-  days(data) {
-    var day = DateTime.now().day + 1;
-    data!.list!.where((element) {
-      if (element.dt_txt!.day == day) {
-        dayData.add(element);
-        day++;
-      }
-      return true;
-    }).toString();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final postModel = Provider.of<WeatherProvider>(context);
+    var dayData = [];
+
+    days(data) {
+      var day = DateTime.now().day + 1;
+      data!.list!.where((element) {
+        if (element.dt_txt!.day == day) {
+          dayData.add(element);
+          day++;
+        }
+        return true;
+      }).toString();
+    }
+
     days(widget.snapshot);
-    return Scaffold(
-      body: Container(
-        color: Colors.black,
-        child: Column(
-          children: [
-            // Expanded(
-            //   child: Text(
-            //     widget.snapshot.list!
-            //         .elementAt(0)
-            //         .weather!
-            //         .elementAt(0)
-            //         .description
-            //         .toString(),
-            //     style: const TextStyle(
-            //       color: white,
-            //       fontSize: 18,
-            //     ),
-            //   ),
-            // ),
-            // const SizedBox(
-            //   width: 64,
-            // ),
-            // Container(
-            //   padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-            //   decoration: BoxDecoration(
-            //     border: Border.all(
-            //       width: 1,
-            //       color: grey,
-            //     ),
-            //     borderRadius: BorderRadius.circular(12),
-            //   ),
-            //   child: Row(
-            //     children: [
-            //       const Icon(
-            //         Icons.location_on,
-            //         color: white,
-            //         size: 20,
-            //       ),
-            //       const SizedBox(
-            //         width: 8,
-            //       ),
-            //       Text(
-            //         widget.snapshot.city!.name.toString(),
-            //         style: const TextStyle(
-            //           color: white,
-            //           fontSize: 18,
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: dayData.length,
-                itemBuilder: (context, index) {
-                  return Container(
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
+          color: darkBlue,
+          padding: const EdgeInsets.fromLTRB(32, 32, 32, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: white,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(
+                    width: 12,
+                  ),
+                  const Text(
+                    'Back',
+                    style: TextStyle(
+                      color: white,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const Expanded(child: SizedBox()),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        width: 1,
+                        color: grey,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Text(
-                          DateFormat('EEEE, d MMMM')
-                              .format(dayData[index].dt_txt),
-                          style: const TextStyle(
-                            color: white,
-                            letterSpacing: 0.25,
-                          ),
+                        const Icon(
+                          Icons.location_on,
+                          color: white,
+                          size: 20,
                         ),
-                        Image.network(
-                          'https://openweathermap.org/img/wn/${dayData[index].weather!.elementAt(0).icon}@2x.png',
-                          scale: 1.7,
+                        const SizedBox(
+                          width: 8,
                         ),
                         Text(
-                          '${dayData[index].main!.temp!.toInt()}\u00B0',
+                          postModel.post?.city?.name ?? '',
                           style: const TextStyle(
                             color: white,
-                            fontSize: 20,
+                            fontSize: 18,
                           ),
                         ),
                       ],
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
-            )
-          ],
+              const SizedBox(
+                height: 48,
+              ),
+              const Text(
+                'Next 5 days ',
+                style: TextStyle(
+                  color: white,
+                  fontSize: 24,
+                ),
+              ),
+              const SizedBox(
+                height: 32,
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: dayData.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        // crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: ListTile(
+                              title: Text(
+                                DateFormat('EEEE')
+                                    .format(dayData[index].dt_txt),
+                                style: const TextStyle(
+                                  color: white,
+                                  letterSpacing: 0.5,
+                                  fontSize: 22,
+                                ),
+                              ),
+                              subtitle: Text(
+                                DateFormat('d MMMM')
+                                    .format(dayData[index].dt_txt),
+                                style: const TextStyle(
+                                  color: lightgrey,
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              trailing: Image.network(
+                                'https://openweathermap.org/img/wn/${dayData[index].weather!.elementAt(0).icon}@2x.png',
+                                scale: 1.7,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.1,
+                          ),
+                          Text(
+                            '${dayData[index].main!.temp!.toInt()}\u00B0',
+                            style: const TextStyle(
+                              color: white,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

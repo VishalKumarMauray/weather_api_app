@@ -6,9 +6,9 @@ class WeatherProvider extends ChangeNotifier {
   WeatherData? post;
   bool isLoading = false;
 
-  getData() async {
+  getData(city) async {
     isLoading = true;
-    post = (await fetchWeather('delhi'))!;
+    post = (await fetchWeather(city))!;
     isLoading = false;
     notifyListeners();
   }

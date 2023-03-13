@@ -7,4 +7,5 @@ const grey = Color(0xffff6C7081);
 const darkBlue = Color(0xffff0F1324);
 const lightBlue = Color.fromARGB(255, 21, 26, 50);
 const lightgrey = Color(0xffff9FA3B4);
-const gradientPink = Color(0xffff280316);
+const darkIndigo = Color.fromARGB(255, 1, 45, 120);
+const lightIndigo = Color(0xfffff0038ff);

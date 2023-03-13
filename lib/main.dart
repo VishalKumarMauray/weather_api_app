@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:weather_api/home.screen.dart';
+import 'package:weather_api/main-screen.dart';
 import 'package:weather_api/provider/weather_provider.dart';
 
 void main() {
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       child: const MaterialApp(
         title: 'Weather',
         debugShowCheckedModeBanner: false,
-        home: HomeScreen(),
+        home: MainScreen(),
       ),
     );
   }
