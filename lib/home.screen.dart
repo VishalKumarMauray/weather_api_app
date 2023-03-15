@@ -10,8 +10,9 @@ import 'package:weather_api/models/weather-forcast.dart';
 import 'package:weather_api/provider/weather_provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key, required this.city});
-  String city;
+  HomeScreen({
+    super.key,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -32,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     final postModel = Provider.of<WeatherProvider>(context, listen: false);
-    postModel.getData(widget.city);
+    postModel.getData();
   }
 
   @override

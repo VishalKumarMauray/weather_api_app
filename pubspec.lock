@@ -25,6 +25,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  city_picker_from_map:
+    dependency: "direct main"
+    description:
+      name: city_picker_from_map
+      sha256: fb9ebf80b15df28f5032b5182f3f37d81b60852890a5fe9b6e74d19624f5da34
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   clock:
     dependency: transitive
     description:
@@ -41,6 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.17.0"
+  country_state_city_picker:
+    dependency: "direct main"
+    description:
+      name: country_state_city_picker
+      sha256: "509c282165df329ee5a29babb28e13dce3bc32166cea21b202a49c44d20cfef3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.8"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -208,6 +224,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  svg_path_parser:
+    dependency: transitive
+    description:
+      name: svg_path_parser
+      sha256: c0864f85efd1024e9f667ddcda10601b1199e3980fb07d63701f9b9a047bdab3
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   term_glyph:
     dependency: transitive
     description:
@@ -242,4 +266,4 @@ packages:
     version: "2.1.4"
 sdks:
   dart: ">=2.19.2 <3.0.0"
-  flutter: ">=1.16.0"
+  flutter: ">=1.17.0"

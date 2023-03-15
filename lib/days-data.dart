@@ -19,7 +19,7 @@ class _daysDataState extends State<daysData> {
     var dayData = [];
 
     days(data) {
-      var day = DateTime.now().day + 1;
+      var day = DateTime.now().day;
       data!.list!.where((element) {
         if (element.dt_txt!.day == day) {
           dayData.add(element);
@@ -117,21 +117,40 @@ class _daysDataState extends State<daysData> {
                         children: [
                           Expanded(
                             child: ListTile(
-                              title: Text(
-                                DateFormat('EEEE')
-                                    .format(dayData[index].dt_txt),
-                                style: const TextStyle(
-                                  color: white,
-                                  letterSpacing: 0.5,
-                                  fontSize: 22,
-                                ),
-                              ),
+                              title: index == 0
+                                  ? const Text(
+                                      'Today',
+                                      style: TextStyle(
+                                        color: white,
+                                        letterSpacing: 0.5,
+                                        fontSize: 22,
+                                      ),
+                                    )
+                                  : index == 1
+                                      ? const Text(
+                                          'Tomorrow',
+                                          style: TextStyle(
+                                            color: white,
+                                            letterSpacing: 0.5,
+                                            fontSize: 22,
+                                          ),
+                                        )
+                                      : Text(
+                                          DateFormat('EEEE')
+                                              .format(dayData[index].dt_txt),
+                                          style: const TextStyle(
+                                            color: white,
+                                            letterSpacing: 0.5,
+                                            fontSize: 22,
+                                          ),
+                                        ),
                               subtitle: Text(
                                 DateFormat('d MMMM')
                                     .format(dayData[index].dt_txt),
                                 style: const TextStyle(
-                                  color: lightgrey,
-                                  fontWeight: FontWeight.w300,
+                                  color: grey,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
                                   fontSize: 14,
                                 ),
                               ),

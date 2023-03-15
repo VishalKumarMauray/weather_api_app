@@ -12,13 +12,12 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int navIndex = 0;
-  String city = 'gurugram';
 
   @override
   Widget build(BuildContext context) {
     List<Widget> screens = [
-      HomeScreen(city: city),
-      SearchScreen(city: city),
+      HomeScreen(),
+      SearchScreen(),
       const CircularProgressIndicator(),
     ];
     return SafeArea(
@@ -35,7 +34,6 @@ class _MainScreenState extends State<MainScreen> {
             setState(() {
               navIndex = value;
             });
-            print(city);
           },
           items: const [
             BottomNavigationBarItem(

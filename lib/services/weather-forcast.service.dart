@@ -14,7 +14,7 @@ Future<WeatherData?> fetchWeather(city) async {
       final item = json.decode(response.body);
       result = WeatherData.fromJson(item);
     } else {
-      print('error');
+      print('${response.reasonPhrase}');
     }
   } catch (e) {
     print(e.toString());

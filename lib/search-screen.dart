@@ -3,29 +3,32 @@ import 'package:provider/provider.dart';
 import 'package:weather_api/provider/weather_provider.dart';
 
 class SearchScreen extends StatefulWidget {
-  SearchScreen({super.key, required this.city});
-  String city;
+  const SearchScreen({
+    super.key,
+  });
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  String city = '';
   @override
   Widget build(BuildContext context) {
+    final postModel = Provider.of<WeatherProvider>(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         TextField(
           onChanged: (value) {
-            widget.city = value;
+            city = value;
           },
         ),
         ElevatedButton(
           onPressed: () {
-            print(widget.city);
+            postModel.updateCity(city);
           },
-          child: const Text('save'),
+          child: const Text('update'),
         ),
       ],
     );
